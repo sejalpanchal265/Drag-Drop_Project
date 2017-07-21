@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html ng-app="drag-and-drop">
+  <head lang="en">
+    <meta charset="utf-8">
+    <title>Drag & Drop: Multiple listsr</title>
+    <link href="css/jquery-ui.min.css" rel="stylesheet" type="text/css" />
+    <link href="css/bootstrap-3.3.5-dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="libs/jquery.min.js"></script>
+    <script src="libs/jquery-ui.min.js"></script>
+    <script src="libs/angular.min.js"></script>
+    <script src="libs/ui-bootstrap-tpls.js"></script>
+    <script src="angular-dragdrop.min.js"></script>
+    <script src="app.js"></script>
+    <style>
+       body { padding-top: 60px; }
+      .thumbnail { height: 180px !important; }
+      .droppable-body { padding: 1px 0px; }
+      .btn-droppable { width: 180px; height: 30px; padding-left: 4px; }
+      .btn-draggable { width: 270px; margin: 1px; text-align: left;cursor:move;}
+      .panel-droppable { width: 600px; height: 350px; margin: 10px;}
+      .panel-draggable { width: 580px; height: 330px; }
+    </style>
+  </head> 
+  <body ng-controller="oneCtrl">
+  
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <a class="navbar-brand" href="#">Project Member Management Console </a>
+      </div>
+    </div>
+  </nav>
+  <div class="container-fluid"> 
+      <div class="row">
+          <div class="col-md-3">
+              
+             <div class="panel panel-default">
+                <div class="panel-heading">
+                  <div class="row">
+                        <div class="col-md-6">
+                          <h3 class="panel-title">Members</h3>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success" ng-click="addMember()">  <span class="glyphicon glyphicon-plus-sign"></span> Add Member</button>
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                <div class="panel-body">
+                  <div class="droppable-body" 
+                      data-drop="true"
+                      ng-model='membersList' 
+                      jqyoui-droppable="{multiple:true}">
+                        <div class="btn btn-primary btn-draggable" 
+                        ng-repeat="member in membersList" 
+                        data-drag="true" 
+                        data-jqyoui-options="{revert: 'invalid'}" 
+                        ng-model="membersList" 
+                        jqyoui-draggable="{index: {{$index}},animate:true}"
+                        >
+                            {{member.firstName}} {{member.lastName}} <span class="badge">{{member.rating}}</span>
+                        </div>
+                  </div>
+                </div>
+              </div>
+          </div>
+          <div class="col-md-9">
+              <div class="panel panel-default">
+                <div class="panel-heading">
+                   <div class="row">
+                        <div class="col-md-10">
+                          <h3 class="panel-title">Projects</h3>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-success" ng-click="addNewProject()">  <span class="glyphicon glyphicon-plus-sign"></span> Add Project</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                          <div>
+                         
+                            <div class="panel panel-primary"
+                                ng-repeat="project in projectsList"
+                                >
+                            
+                                <div class="panel-heading">
+                                    <h3 class="panel-title" ng-show='!project.isEdit'>{{project.name}}</h3>
+                                    <input class="form-control" type="text" ng-show='project.isEdit' ng-model="project.name"/>
+                                </div>
+                                <div class="panel-body">
+                                    <h5><b>Description:</b></h5>
+                                    <p ng-show='!project.isEdit'>{{project.description}}</p>
+                                    <textarea ng-show='project.isEdit' class="form-control" ng-model="project.description"></textarea></p>
+                                        <a class="btn btn-default btn-xs" ng-show='!project.isEdit' ng-click='project.isEdit=true' href="#">
+                                           <span class="glyphicon glyphicon-pencil"></span> Edit
+                                        </a>
+                                        <a class="btn btn-success btn-xs" ng-show='project.isEdit' ng-click='project.isEdit=false' href="#">
+                                           <span class="glyphicon glyphicon-save"></span> Save
+                                        </a>
+                                        <a class="btn btn-danger btn-xs" ng-click='deleteProject(project)' href="#">
+                                           <span class="glyphicon glyphicon-trash"></span> Delete
+                                        </a>
+                                    </p>
+                                    <h5><b>Members:</b></h5>
+                                    <div class="panel panel-default">
+                                      <div class="panel-body">
+                                        <div class="droppable-body" style="min-height:30px;"
+                                        data-drop="true" 
+                                        ng-model='project.membersList' 
+                                        jqyoui-droppable="{beforeDrop: 'beforeDrop'}">
+                                            <div class="btn btn-primary btn-draggable" 
+                                            ng-repeat="member in project.membersList" 
+                                            data-drag="true" 
+                                            data-jqyoui-options="{revert: 'invalid'}" 
+                                            ng-model="project.membersList" 
+                                            jqyoui-draggable="{index: {{$index}},animate:true}">
+                                                {{member.firstName}} {{member.lastName}} <span class="badge">{{member.rating}}</span>
+                                            </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4"></div>
+                    </div>
+                </div>
+              </div>
+          </div>
+      </div>
+  </div>
+   <script type="text/ng-template" id="AddNewProject.html">
+        <div class="modal-header">
+            <h4 class="modal-title">Add Project</h4>
+        </div>
+          <div class="modal-body">
+            <div class="alert alert-danger" ng-show="error" role="alert">
+                <strong>Error!</strong> Please provide valid project name & description.  
+            </div>
+            <form>
+              <div class="form-group">
+                <label for="project-name" class="control-label">Name:</label>
+                <input type="text" class="form-control" id="name" ng-model="project.name">
+              </div>
+              <div class="form-group">
+                <label for="description-text" class="control-label">Description:</label>
+                <textarea class="form-control" id="description" ng-model="project.description"></textarea>
+              </div>
+            </form>
+          </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+    <script type="text/ng-template" id="AddMember.html">
+        <div class="modal-header">
+            <h4 class="modal-title">Add Member</h4>
+        </div>
+          <div class="modal-body">
+            <div class="alert alert-danger" ng-show="error" role="alert">
+                <strong>Error!</strong> Please provide valid member first name, last name & rating.  
+            </div>
+            <form>
+              <div class="form-group">
+                <label for="firstname" class="control-label">First Name:</label>
+                <input type="text" class="form-control" id="firstName" ng-model="member.firstName">
+              </div>
+
+              <div class="form-group">
+                <label for="lastName" class="control-label">Last Name:</label>
+                <input type="text" class="form-control" id="lastName" ng-model="member.lastName">
+              </div>
+
+              <div class="form-group">
+                <label for="rating">Rating:</label>
+                <select class="form-control" id="rating" ng-model="member.rating">
+                  <option>1</option>
+                  <option>2</option>
+                  <option>3</option>
+                  <option>4</option>
+                  <option>5</option>
+                  <option>6</option>
+                  <option>7</option>
+                  <option>8</option>
+                  <option>9</option>
+                  <option>10</option>
+                </select>
+              </div>
+            </form>
+          </div>
+        <div class="modal-footer">
+            <button class="btn btn-primary" type="button" ng-click="ok()">OK</button>
+            <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+        </div>
+    </script>
+
+  <script type="text/ng-template" id="ConfirmationModel.html">
+      <div class="modal-header">
+            <h4 class="modal-title">Confirm</h4>
+        </div>
+      <div class="modal-body">
+        <b>{{data.message}}</b>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="ok()">OK</button>
+        <button class="btn btn-warning" ng-click="cancel()">Cancel</button>
+      </div>
+    </script>
+  </body>
+</html>
